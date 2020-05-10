@@ -25,7 +25,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "entry";
     private static final String KEY_ID = "id";
     private static final String KEY_NAME = "runEntry";
-    private static final String[] COLUMNS = { KEY_ID, KEY_NAME };
+    private static final String[] COLUMNS = {KEY_ID, KEY_NAME};
 
     /**
      * Create a helper object to create, open, and/or manage a database.
@@ -35,7 +35,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
      * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
      * used to handle corruption when sqlite reports database corruption.</p>
      *
-     * @param context      to use for locating paths to the the database
+     * @param context to use for locating paths to the the database
      */
     public SQLiteDatabaseHandler(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -49,8 +49,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATION_TABLE = "CREATE TABLE "+TABLE_NAME+" ( "
-                + KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " +KEY_NAME+ " TEXT )";
+        String CREATION_TABLE = "CREATE TABLE " + TABLE_NAME + " ( "
+                + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + KEY_NAME + " TEXT )";
         db.execSQL(CREATION_TABLE);
     }
 
@@ -83,14 +83,14 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     public void deleteOne(Entry runEntry) {
         // Get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_NAME, "id = ?", new String[] { String.valueOf(runEntry.getId()) });
+        db.delete(TABLE_NAME, "id = ?", new String[]{String.valueOf(runEntry.getId())});
         db.close();
     }
 
     public void deleteAll() {
         // Get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM "+TABLE_NAME+" where id > 0");
+        db.execSQL("DELETE FROM " + TABLE_NAME + " where id > 0");
         //clear unused space
         db.execSQL("VACUUM");
         db.close();
@@ -119,7 +119,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, entry.getRunEntry());
         // insert
-        db.insert(TABLE_NAME,null, values);
+        db.insert(TABLE_NAME, null, values);
         db.close();
     }
 

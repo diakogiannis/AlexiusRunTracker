@@ -12,9 +12,7 @@ import android.os.StrictMode;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +36,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final int THRESHOLD = 600; //used to see whether a shake gesture has been detected or not.
+    final int DELAY_PERIOD = 5000;
     private final String TAG = MainActivity.class.getSimpleName();
     TextView coordinates;
     TextView address;
@@ -49,10 +48,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private long lastTime = 0;
     private float lastX, lastY, lastZ;
     private SQLiteDatabaseHandler db;
-
     private boolean trackingStarted = false;
 
-    final int DELAY_PERIOD = 5000;
+    /**
+     * Calculate distance
+     *
+     * @param lat1
+     * @param lon1
+     * @param lat2
+     * @param lon2
+     * @param unit
+     * @return
+     */
+    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
+        if ((lat1 == lat2) && (lon1 == lon2)) {
+            return 0;
+        } else {
+            double theta = lon1 - lon2;
+            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
+            dist = Math.acos(dist);
+            dist = Math.toDegrees(dist);
+            dist = dist * 60 * 1.1515;
+            if (unit.equals("K")) {
+                dist = dist * 1.609344;
+            } else if (unit.equals("N")) {
+                dist = dist * 0.8684;
+            }
+            return (dist);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void startPaceBgService(View v) {
         CharSequence toastText = "";
-        if(trackingStarted){
+        if (trackingStarted) {
             toastText = "Tracking Stopped";
             ((Button) findViewById(R.id.startTrackingButton)).setText("START!");
         } else {
@@ -97,8 +121,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         toast.show();
 
 
-
-        if(trackingStarted) {
+        if (trackingStarted) {
 
             //cleab db
             db.deleteAll();
@@ -160,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             }
 
                             //put everything to DB
-                            db.addEntry(new Entry("Pace: "+pace+" Linear Acceleration: "+linearAccelerationFormated+"  Distance covered in "+DELAY_PERIOD+"ms: "+distanceFormated));
+                            db.addEntry(new Entry("Pace: " + pace + " Linear Acceleration: " + linearAccelerationFormated + "  Distance covered in " + DELAY_PERIOD + "ms: " + distanceFormated));
 
 
                             //log it
@@ -179,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             StringBuilder sb = new StringBuilder();
 
                             if (entries != null) {
-                                for(Entry entry : entries){
+                                for (Entry entry : entries) {
                                     sb.append(entry.getRunEntry());
                                     sb.append("\n\n");
                                 }
@@ -224,37 +247,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         //default
-    }
-
-    /**
-     *  Calculate distance
-     * @param lat1
-     * @param lon1
-     * @param lat2
-     * @param lon2
-     * @param unit
-     * @return
-     */
-    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
-        if ((lat1 == lat2) && (lon1 == lon2)) {
-            return 0;
-        } else {
-            double theta = lon1 - lon2;
-            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
-            dist = Math.acos(dist);
-            dist = Math.toDegrees(dist);
-            dist = dist * 60 * 1.1515;
-            if (unit.equals("K")) {
-                dist = dist * 1.609344;
-            } else if (unit.equals("N")) {
-                dist = dist * 0.8684;
-            }
-            return (dist);
-        }
     }
 
     public void stopTimer() {
@@ -266,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     /**
      * The equation to calculate it is, √‾‾‾‾‾‾‾‾‾‾‾‾𝑥2+𝑦2+𝑧2
+     *
      * @param a
      * @param b
      * @param c
